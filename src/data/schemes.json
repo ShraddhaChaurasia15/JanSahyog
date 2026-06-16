@@ -1,0 +1,228 @@
+[
+  {
+  "id": 1,
+  "category": "agriculture",
+  "name": "PM Kisan Samman Nidhi",
+  "description": "Income support of ₹6000 per year for farmers.",
+
+  "benefits": [
+    "₹6000 per year",
+    "Direct Bank Transfer",
+    "Financial Support"
+  ],
+
+  "eligibility": [
+    "Must be a farmer",
+    "Indian citizen",
+    "Valid Aadhaar Card"
+  ],
+
+  "documents": [
+    "Aadhaar Card",
+    "Bank Passbook",
+    "Land Records"
+  ],
+
+  "applyLink": "https://pmkisan.gov.in/",
+  "officialWebsite": "https://pmkisan.gov.in/"
+},
+
+ {
+  "id": 2,
+  "category": "agriculture",
+  "name": "PM Fasal Bima Yojana",
+  "description": "Crop insurance scheme protecting farmers against crop loss.",
+  "benefits": [
+    "Crop insurance coverage",
+    "Compensation for crop loss",
+    "Financial protection"
+  ],
+  "eligibility": [
+    "Farmer owning or cultivating land",
+    "Must register for crop season"
+  ],
+  "documents": [
+    "Aadhaar Card",
+    "Land Records",
+    "Bank Account Details"
+  ],
+  "applyLink": "https://pmfby.gov.in/",
+  "officialWebsite": "https://pmfby.gov.in/"
+},
+
+{
+  "id": 3,
+  "category": "education",
+  "name": "National Scholarship Portal",
+  "description": "Centralized scholarship platform for students.",
+  "benefits": [
+    "Tuition fee support",
+    "Maintenance allowance",
+    "Direct scholarship transfer"
+  ],
+  "eligibility": [
+    "Student enrolled in recognized institution",
+    "Income criteria as per scheme"
+  ],
+  "documents": [
+    "Aadhaar Card",
+    "Income Certificate",
+    "Marksheet",
+    "Bank Passbook"
+  ],
+  "applyLink": "https://scholarships.gov.in/",
+  "officialWebsite": "https://scholarships.gov.in/"
+},
+
+{
+  "id": 4,
+  "category": "education",
+  "name": "Post Matric Scholarship",
+  "description": "Scholarship support for higher education students.",
+  "benefits": [
+    "Fee reimbursement",
+    "Maintenance allowance"
+  ],
+  "eligibility": [
+    "SC/ST/OBC students",
+    "Post-matric studies"
+  ],
+  "documents": [
+    "Caste Certificate",
+    "Income Certificate",
+    "Marksheet"
+  ],
+  "applyLink": "https://scholarships.gov.in/",
+  "officialWebsite": "https://scholarships.gov.in/"
+},
+
+{
+  "id": 5,
+  "category": "healthcare",
+  "name": "Ayushman Bharat",
+  "description": "Health insurance coverage for eligible families.",
+  "benefits": [
+    "₹5 lakh health coverage",
+    "Cashless treatment",
+    "Coverage across India"
+  ],
+  "eligibility": [
+    "SECC eligible families",
+    "Indian citizen"
+  ],
+  "documents": [
+    "Aadhaar Card",
+    "Ration Card",
+    "Mobile Number"
+  ],
+  "applyLink": "https://pmjay.gov.in/",
+  "officialWebsite": "https://pmjay.gov.in/"
+},
+
+{
+  "id": 6,
+  "category": "housing",
+  "name": "Pradhan Mantri Awas Yojana",
+  "description": "Affordable housing scheme for economically weaker sections.",
+  "benefits": [
+    "Housing subsidy",
+    "Interest subsidy on home loans"
+  ],
+  "eligibility": [
+    "No pucca house ownership",
+    "Eligible income category"
+  ],
+  "documents": [
+    "Aadhaar Card",
+    "Income Certificate",
+    "Property Documents"
+  ],
+  "applyLink": "https://pmaymis.gov.in/",
+  "officialWebsite": "https://pmaymis.gov.in/"
+},
+
+{
+  "id": 7,
+  "category": "women",
+  "name": "Beti Bachao Beti Padhao",
+  "description": "Promotes education and welfare of girl children.",
+  "benefits": [
+    "Awareness support",
+    "Educational encouragement"
+  ],
+  "eligibility": [
+    "Girl child beneficiaries",
+    "Indian citizens"
+  ],
+  "documents": [
+    "Birth Certificate",
+    "Aadhaar Card"
+  ],
+  "applyLink": "https://wcd.nic.in/",
+  "officialWebsite": "https://wcd.nic.in/"
+},
+
+{
+  "id": 8,
+  "category": "women",
+  "name": "Mahila Shakti Kendra",
+  "description": "Empowerment and support for women.",
+  "benefits": [
+    "Skill development",
+    "Community support"
+  ],
+  "eligibility": [
+    "Women beneficiaries"
+  ],
+  "documents": [
+    "Aadhaar Card",
+    "Residence Proof"
+  ],
+  "applyLink": "https://wcd.nic.in/",
+  "officialWebsite": "https://wcd.nic.in/"
+},
+
+{
+  "id": 9,
+  "category": "employment",
+  "name": "Skill India Mission",
+  "description": "Skill development and employment opportunities.",
+  "benefits": [
+    "Free training",
+    "Certification",
+    "Job opportunities"
+  ],
+  "eligibility": [
+    "Indian citizen",
+    "Youth seeking employment"
+  ],
+  "documents": [
+    "Aadhaar Card",
+    "Educational Certificates"
+  ],
+  "applyLink": "https://www.skillindia.gov.in/",
+  "officialWebsite": "https://www.skillindia.gov.in/"
+},
+
+{
+  "id": 10,
+  "category": "employment",
+  "name": "National Career Service",
+  "description": "Government employment and career platform.",
+  "benefits": [
+    "Job matching",
+    "Career counseling",
+    "Employment opportunities"
+  ],
+  "eligibility": [
+    "Indian citizens seeking jobs"
+  ],
+  "documents": [
+    "Aadhaar Card",
+    "Resume",
+    "Educational Certificates"
+  ],
+  "applyLink": "https://www.ncs.gov.in/",
+  "officialWebsite": "https://www.ncs.gov.in/"
+}
+]
