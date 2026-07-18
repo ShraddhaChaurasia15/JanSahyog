@@ -11,19 +11,4 @@ AI-powered Government Welfare Scheme Recommendation Portal
 - Scheme Categorization
 - Application Tracking
 
-## Tech Stack
 
-Frontend:
-- React
-- React Router
-- CSS
-
-Backend:
-- FastAPI
-- Python
-
-AI:
-- Gemini API
-
-OCR:
-- Tesseract OCR
