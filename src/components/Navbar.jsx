@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import './Navbar.css';
 
 function Navbar({ isAuthenticated, user, onLogout }) {
+  const { language, changeLanguage, t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showSchemesMenu, setShowSchemesMenu] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const schemeCategories = [
+    { id: 'agriculture', name: 'Agriculture', icon: '🌾' },
+    { id: 'education', name: 'Education', icon: '🎓' },
+    { id: 'healthcare', name: 'Healthcare', icon: '🏥' },
+    { id: 'housing', name: 'Housing', icon: '🏠' },
+    { id: 'women', name: 'Women Welfare', icon: '👩' },
+    { id: 'employment', name: 'Employment', icon: '💼' }
+  ];
 
   //use effect 
   useEffect(() => {
@@ -22,13 +34,16 @@ function Navbar({ isAuthenticated, user, onLogout }) {
   useEffect(() => {
     setIsMenuOpen(false);
     setShowUserMenu(false);
+    setShowSchemesMenu(false);
   }, [location]);
 
- 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest('.nav-user') && !e.target.closest('.user-dropdown')) {
         setShowUserMenu(false);
+      }
+      if (!e.target.closest('.nav-dropdown-wrapper') && !e.target.closest('.schemes-dropdown-menu')) {
+        setShowSchemesMenu(false);
       }
     };
 
@@ -41,6 +56,7 @@ function Navbar({ isAuthenticated, user, onLogout }) {
     navigate('/');
     setIsMenuOpen(false);
     setShowUserMenu(false);
+    setShowSchemesMenu(false);
   };
 
   const toggleMenu = () => {
@@ -97,17 +113,50 @@ function Navbar({ isAuthenticated, user, onLogout }) {
           {isAuthenticated ? (
             <>
               <Link 
-                to="/dashboard" 
-                className={`nav-link ${isActiveLink('/dashboard') ? 'active' : ''}`}
+                to="/" 
+                className={`nav-link ${isActiveLink('/') ? 'active' : ''}`}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
-                  <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
-                  <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span> Dashboard</span>
+                <span>{t('nav_home')}</span>
               </Link>
+
+              <div className="nav-dropdown-wrapper">
+                <button 
+                  className={`nav-link dropdown-toggle-btn ${showSchemesMenu ? 'active' : ''}`}
+                  onClick={() => setShowSchemesMenu(!showSchemesMenu)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>{t('nav_schemes')}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className={`arrow-icon ${showSchemesMenu ? 'open' : ''}`} style={{ marginLeft: '4px', transition: 'transform 0.2s ease' }}>
+                    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                {showSchemesMenu && (
+                  <div className="schemes-dropdown-menu">
+                    {schemeCategories.map(cat => (
+                      <Link 
+                        key={cat.id} 
+                        to={`/schemes/${cat.id}`} 
+                        className="schemes-dropdown-item" 
+                        onClick={() => setShowSchemesMenu(false)}
+                      >
+                        <span className="dropdown-item-icon">{cat.icon}</span>
+                        <span>
+                          {language === 'hi' 
+                            ? (cat.id === 'agriculture' ? 'कृषि' : cat.id === 'education' ? 'शिक्षा' : cat.id === 'healthcare' ? 'स्वास्थ्य सेवा' : cat.id === 'housing' ? 'आवास' : cat.id === 'women' ? 'महिला कल्याण' : 'रोजगार') 
+                            : cat.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               <Link 
                 to="/check-eligibility" 
@@ -117,8 +166,55 @@ function Navbar({ isAuthenticated, user, onLogout }) {
                   <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span>Check Eligibility</span>
+                <span>{t('nav_check_eligibility')}</span>
               </Link>
+
+              <Link 
+                to="/dashboard" 
+                className={`nav-link ${isActiveLink('/dashboard') ? 'active' : ''}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+                <span>{t('nav_my_profile')}</span>
+              </Link>
+
+              {/* Language Selector */}
+              <div className="language-selector-wrapper" style={{ display: 'flex', alignItems: 'center', marginRight: '1rem', border: '1px solid var(--gray-200)', borderRadius: '6px', padding: '2px' }}>
+                <button 
+                  className={`lang-selector-btn ${language === 'en' ? 'active' : ''}`}
+                  onClick={() => changeLanguage('en')}
+                  style={{
+                    background: language === 'en' ? 'var(--primary-light)' : 'none',
+                    color: language === 'en' ? 'var(--primary)' : 'var(--gray-600)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  EN
+                </button>
+                <button 
+                  className={`lang-selector-btn ${language === 'hi' ? 'active' : ''}`}
+                  onClick={() => changeLanguage('hi')}
+                  style={{
+                    background: language === 'hi' ? 'var(--primary-light)' : 'none',
+                    color: language === 'hi' ? 'var(--primary)' : 'var(--gray-600)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  हिन्दी
+                </button>
+              </div>
 
               {/* User Menu */}
               <div className="nav-user">
@@ -157,20 +253,12 @@ function Navbar({ isAuthenticated, user, onLogout }) {
                     
                     <div className="dropdown-divider"></div>
                     
-                    <Link to="/profile" className="dropdown-item">
+                    <Link to="/dashboard" className="dropdown-item">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                         <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
                       </svg>
                       <span>My Profile</span>
-                    </Link>
-                    
-                    <Link to="/settings" className="dropdown-item">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                      <span>Settings</span>
                     </Link>
                     
                   <div className="dropdown-divider"></div>
@@ -198,8 +286,43 @@ function Navbar({ isAuthenticated, user, onLogout }) {
                   <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span>Home</span>
+                <span>{t('nav_home')}</span>
               </Link>
+
+              <div className="nav-dropdown-wrapper">
+                <button 
+                  className={`nav-link dropdown-toggle-btn ${showSchemesMenu ? 'active' : ''}`}
+                  onClick={() => setShowSchemesMenu(!showSchemesMenu)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', outline: 'none' }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>{t('nav_schemes')}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className={`arrow-icon ${showSchemesMenu ? 'open' : ''}`} style={{ marginLeft: '4px', transition: 'transform 0.2s ease' }}>
+                    <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                {showSchemesMenu && (
+                  <div className="schemes-dropdown-menu">
+                    {schemeCategories.map(cat => (
+                      <Link 
+                        key={cat.id} 
+                        to={`/schemes/${cat.id}`} 
+                        className="schemes-dropdown-item" 
+                        onClick={() => setShowSchemesMenu(false)}
+                      >
+                        <span className="dropdown-item-icon">{cat.icon}</span>
+                        <span>
+                          {language === 'hi' 
+                            ? (cat.id === 'agriculture' ? 'कृषि' : cat.id === 'education' ? 'शिक्षा' : cat.id === 'healthcare' ? 'स्वास्थ्य सेवा' : cat.id === 'housing' ? 'आवास' : cat.id === 'women' ? 'महिला कल्याण' : 'रोजगार') 
+                            : cat.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               <Link 
                 to="/about" 
@@ -209,15 +332,51 @@ function Navbar({ isAuthenticated, user, onLogout }) {
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                   <path d="M12 16V12M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
-                <span>About</span>
+                <span>{t('nav_about')}</span>
               </Link>
               
+              {/* Language Selector */}
+              <div className="language-selector-wrapper" style={{ display: 'flex', alignItems: 'center', marginRight: '0.5rem', border: '1px solid var(--gray-200)', borderRadius: '6px', padding: '2px' }}>
+                <button 
+                  className={`lang-selector-btn ${language === 'en' ? 'active' : ''}`}
+                  onClick={() => changeLanguage('en')}
+                  style={{
+                    background: language === 'en' ? 'var(--primary-light)' : 'none',
+                    color: language === 'en' ? 'var(--primary)' : 'var(--gray-600)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  EN
+                </button>
+                <button 
+                  className={`lang-selector-btn ${language === 'hi' ? 'active' : ''}`}
+                  onClick={() => changeLanguage('hi')}
+                  style={{
+                    background: language === 'hi' ? 'var(--primary-light)' : 'none',
+                    color: language === 'hi' ? 'var(--primary)' : 'var(--gray-600)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  हिन्दी
+                </button>
+              </div>
+
               <Link to="/login" className="btn btn-ghost">
-                Login
+                {t('nav_login')}
               </Link>
               
               <Link to="/register" className="btn btn-primary">
-                <span>Get Started</span>
+                <span>{t('nav_get_started')}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -255,38 +414,54 @@ function Navbar({ isAuthenticated, user, onLogout }) {
 
                 <div className="mobile-divider"></div>
 
-                <Link to="/dashboard" className="mobile-nav-link">
+                 <Link to="/" className="mobile-nav-link">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
-                    <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span>Dashboard</span>
+                  <span>{t('nav_home')}</span>
                 </Link>
+
+                <div className="mobile-schemes-section">
+                  <button className="mobile-nav-link collapsible-header" onClick={() => setShowSchemesMenu(!showSchemesMenu)} style={{ width: '100%', border: 'none', background: 'none', textAlign: 'left', outline: 'none', display: 'flex', alignItems: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--gray-400)' }}>
+                      <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>{t('nav_schemes')}</span>
+                    <span className="collapsible-arrow" style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--gray-400)' }}>{showSchemesMenu ? '▼' : '▶'}</span>
+                  </button>
+                  {showSchemesMenu && (
+                    <div className="mobile-submenu" style={{ paddingLeft: '1.5rem', background: '#f8fafc', borderRadius: '8px', marginTop: '4px' }}>
+                      {schemeCategories.map(cat => (
+                        <Link 
+                          key={cat.id} 
+                          to={`/schemes/${cat.id}`} 
+                          className="mobile-nav-link mobile-submenu-link" 
+                          onClick={() => { setIsMenuOpen(false); setShowSchemesMenu(false); }}
+                          style={{ padding: '0.5rem 0' }}
+                        >
+                          <span style={{ marginRight: '8px' }}>{cat.icon}</span>
+                          <span>{cat.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <Link to="/check-eligibility" className="mobile-nav-link">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span>Check Eligibility</span>
+                  <span>{t('nav_check_eligibility')}</span>
                 </Link>
 
-                <Link to="/profile" className="mobile-nav-link">
+                <Link to="/dashboard" className="mobile-nav-link">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
                   </svg>
-                  <span>My Profile</span>
-                </Link>
-
-                <Link to="/settings" className="mobile-nav-link">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                  <span>Settings</span>
+                  <span>{t('nav_my_profile')}</span>
                 </Link>
 
                 <div className="mobile-divider"></div>
@@ -297,7 +472,7 @@ function Navbar({ isAuthenticated, user, onLogout }) {
                     <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span>Logout</span>
+                  <span>{t('nav_logout')}</span>
                 </button>
               </>
             ) : (
@@ -307,33 +482,93 @@ function Navbar({ isAuthenticated, user, onLogout }) {
                     <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span>Home</span>
+                  <span>{t('nav_home')}</span>
                 </Link>
+
+                <div className="mobile-schemes-section">
+                  <button className="mobile-nav-link collapsible-header" onClick={() => setShowSchemesMenu(!showSchemesMenu)} style={{ width: '100%', border: 'none', background: 'none', textAlign: 'left', outline: 'none', display: 'flex', alignItems: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--gray-400)' }}>
+                      <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>{t('nav_schemes')}</span>
+                    <span className="collapsible-arrow" style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--gray-400)' }}>{showSchemesMenu ? '▼' : '▶'}</span>
+                  </button>
+                  {showSchemesMenu && (
+                    <div className="mobile-submenu" style={{ paddingLeft: '1.5rem', background: '#f8fafc', borderRadius: '8px', marginTop: '4px' }}>
+                      {schemeCategories.map(cat => (
+                        <Link 
+                          key={cat.id} 
+                          to={`/schemes/${cat.id}`} 
+                          className="mobile-nav-link mobile-submenu-link" 
+                          onClick={() => { setIsMenuOpen(false); setShowSchemesMenu(false); }}
+                          style={{ padding: '0.5rem 0' }}
+                        >
+                          <span style={{ marginRight: '8px' }}>{cat.icon}</span>
+                          <span>{cat.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <Link to="/about" className="mobile-nav-link">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                     <path d="M12 16V12M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                   </svg>
-                  <span>About</span>
+                  <span>{t('nav_about')}</span>
                 </Link>
 
                 <div className="mobile-divider"></div>
 
                 <Link to="/login" className="btn btn-ghost btn-full">
-                  Login
+                  {t('nav_login')}
                 </Link>
 
                 <Link to="/register" className="btn btn-primary btn-full">
-                  <span>Get Started</span>
+                  <span>{t('nav_get_started')}</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-
-
                 </Link>
               </>
             )}
+
+            {/* Mobile Universal Language Selector */}
+            <div className="mobile-divider"></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem' }}>
+              <span style={{ color: 'var(--gray-500)', fontSize: '0.9rem', fontWeight: '500' }}>🌐 Language / भाषा:</span>
+              <button 
+                onClick={() => changeLanguage('en')}
+                style={{
+                  background: language === 'en' ? 'var(--primary-light)' : 'none',
+                  color: language === 'en' ? 'var(--primary)' : 'var(--gray-600)',
+                  border: '1px solid var(--gray-200)',
+                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                English
+              </button>
+              <button 
+                onClick={() => changeLanguage('hi')}
+                style={{
+                  background: language === 'hi' ? 'var(--primary-light)' : 'none',
+                  color: language === 'hi' ? 'var(--primary)' : 'var(--gray-600)',
+                  border: '1px solid var(--gray-200)',
+                  borderRadius: '4px',
+                  padding: '4px 10px',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                हिन्दी
+              </button>
+            </div>
           </div>
         </div>
       </div>

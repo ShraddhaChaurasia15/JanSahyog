@@ -1,31 +1,30 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 import './Results.css';
 
-function Results(){
+function Results() {
   const location = useLocation();
   const schemes = location.state?.schemes || [];
+  const { language, t } = useLanguage();
 
   if (schemes.length === 0) {
     return (
-
-       <div className="results-page page-container">
+      <div className="results-page page-container">
         <div className="container">
           <div className="empty-state fade-in">
             <div className="empty-icon">🔍</div>
-            <h2 className="empty-title">No Results Found</h2>
+            <h2 className="empty-title">{language === 'hi' ? 'कोई परिणाम नहीं मिला' : 'No Results Found'}</h2>
             <p className="empty-description">
-              We couldn't find any schemes matching your criteria. 
-              Try adjusting your details or check back later for new schemes.
+              {language === 'hi' 
+                ? 'हमें आपके मानदंडों से मेल खाती कोई योजना नहीं मिली। अपने विवरण को समायोजित करने का प्रयास करें या नई योजनाओं के लिए बाद में देखें।' 
+                : "We couldn't find any schemes matching your criteria. Try adjusting your details or check back later for new schemes."}
             </p>
-            {/* <Link to="/check-eligibility" className="btn bg-black">
-              Check Again
-            </Link> */}
-               <Link to="/check-eligibility" className="btn btn-primary">
-              Check Again
+            <Link to="/check-eligibility" className="btn btn-primary">
+              {language === 'hi' ? 'पुनः जांचें' : 'Check Again'}
             </Link>
-           </div>
-         </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -33,25 +32,23 @@ function Results(){
   return (
     <div className="results-page page-container">
       <div className="container">
-       
-
-
         <div className="results-header fade-in">
           <div>
-            <h1 className="page-title">Your Eligible Schemes</h1>
+            <h1 className="page-title">{language === 'hi' ? 'आपकी योग्य योजनाएं' : 'Your Eligible Schemes'}</h1>
             <p className="page-subtitle">
-              We found {schemes.length} scheme{schemes.length !== 1 ? 's' : ''} you're eligible for
+              {language === 'hi' 
+                ? `हमें ${schemes.length} योजनाएं मिलीं जिनके लिए आप पात्र हैं` 
+                : `We found ${schemes.length} scheme${schemes.length !== 1 ? 's' : ''} you're eligible for`}
             </p>
           </div>
           <Link to="/check-eligibility" className="btn btn-outline">
-            
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M14 7L10 3L6 7" stroke="currentColor" strokeWidth="2" 
                     strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M10 3V13" stroke="currentColor" strokeWidth="2" 
                     strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Check Again
+            {language === 'hi' ? 'पुनः जांचें' : 'Check Again'}
           </Link>
         </div>
 
@@ -59,9 +56,11 @@ function Results(){
         <div className="success-banner slide-in-left">
           <div className="banner-icon">🎉</div>
           <div className="banner-content">
-            <h3 className="banner-title">Great News!</h3>
+            <h3 className="banner-title">{language === 'hi' ? 'बधाई हो!' : 'Great News!'}</h3>
             <p className="banner-text">
-              You qualify for multiple welfare schemes. Review the details below and apply for the ones that suit you best.
+              {language === 'hi' 
+                ? 'आप कई कल्याणकारी योजनाओं के लिए योग्य हैं। नीचे दिए गए विवरणों की समीक्षा करें और जो आपके लिए सबसे उपयुक्त हैं उनके लिए आवेदन करें।' 
+                : 'You qualify for multiple welfare schemes. Review the details below and apply for the ones that suit you best.'}
             </p>
           </div>
         </div>
@@ -76,12 +75,20 @@ function Results(){
             >
               <div className="result-header">
                 <div className="result-badge">{scheme.category || 'General'}</div>
-                <div className="result-match">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 2L10 6L14 6.5L11 9.5L11.5 14L8 12L4.5 14L5 9.5L2 6.5L6 6L8 2Z" 
-                          fill="currentColor"/>
+                <div className="match-ring-wrapper">
+                  <svg className="match-ring" width="40" height="40">
+                    <circle className="match-ring-bg" cx="20" cy="20" r="16" strokeWidth="3" />
+                    <circle 
+                      className="match-ring-fill" 
+                      cx="20" 
+                      cy="20" 
+                      r="16" 
+                      strokeWidth="3"
+                      strokeDasharray={2 * Math.PI * 16}
+                      strokeDashoffset={2 * Math.PI * 16 * (1 - (scheme.matchScore || 95) / 100)}
+                    />
                   </svg>
-                  {scheme.matchScore || 95}% Match
+                  <span className="match-ring-text">{scheme.matchScore || 95}%</span>
                 </div>
               </div>
 
@@ -90,10 +97,10 @@ function Results(){
 
               <div className="result-benefits">
                 <div className="benefit-item">
-                   <span className="benefit-icon">💰</span>
+                  <span className="benefit-icon">💰</span>
                   <div>
-                     <div className="benefit-label">Benefit Amount</div>
-                    <div className="benefit-value">{scheme.benefits || 'As per scheme'}</div>
+                    <div className="benefit-label">{language === 'hi' ? 'लाभ राशि' : 'Benefit Amount'}</div>
+                    <div className="benefit-value">{scheme.benefits || (language === 'hi' ? 'योजना के अनुसार' : 'As per scheme')}</div>
                   </div>
                 </div>
                 
@@ -101,10 +108,10 @@ function Results(){
                   <div className="benefit-item">
                     <span className="benefit-icon">⏱️</span>
                     <div>
-                      <div className="benefit-label">Duration</div>
-                       <div className="benefit-value">{scheme.duration}</div>
+                      <div className="benefit-label">{language === 'hi' ? 'अवधि' : 'Duration'}</div>
+                      <div className="benefit-value">{scheme.duration}</div>
                     </div>
-                   </div>
+                  </div>
                 )}
               </div>
 
@@ -115,33 +122,73 @@ function Results(){
                       <path d="M8 1L10.5 6L16 6.5L12 10.5L13 16L8 13L3 16L4 10.5L0 6.5L5.5 6L8 1Z" 
                             fill="currentColor"/>
                     </svg>
-                  
-                   Why you're eligible:
+                    {t('res_why_eligible')}
                   </div>
                   <p>{scheme.eligibilityReason}</p>
                 </div>
               )}
 
               <div className="result-actions">
-                <button className="btn btn-primary btn-full">
-                  Apply Now
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" 
-                          strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-                <button className="btn btn-outline btn-full">
-                  View Details
-                </button>
+                {scheme.officialWebsite ? (
+                  <a 
+                    href={scheme.officialWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="btn btn-primary btn-full"
+                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  >
+                    {t('res_apply_now')}
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" 
+                            strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </a>
+                ) : (
+                  <button className="btn btn-primary btn-full" disabled>
+                    {t('res_apply_now')}
+                  </button>
+                )}
+                {scheme.officialWebsite ? (
+                  <a 
+                    href={scheme.officialWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="btn btn-outline btn-full"
+                    style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    {t('res_view_details')}
+                  </a>
+                ) : (
+                  <button className="btn btn-outline btn-full" disabled>
+                    {t('res_view_details')}
+                  </button>
+                )}
               </div>
 
               {scheme.requirements && (
-                
-                <details className="result-details">
-                  <summary>Required Documents</summary>
-                  <ul className="requirements-list">
-                    {scheme.requirements.map((req, i) => (
-                      <li key={i}>{req}</li>
+                <details className="result-details" open>
+                  <summary>{t('res_checklist_title')}</summary>
+                  <ul className="requirements-list" style={{ listStyle: 'none', paddingLeft: 0, marginTop: '12px' }}>
+                    {/* Render uploaded & verified documents */}
+                    {scheme.uploadedRequirements && scheme.uploadedRequirements.map((req, i) => (
+                      <li key={`up-${i}`} style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: '600', fontSize: '0.9rem' }}>
+                        <span style={{ fontSize: '1.1rem' }}>✓</span>
+                        <span>{req} ({language === 'hi' ? 'अपलोड और सत्यापित' : 'Uploaded & Verified'})</span>
+                      </li>
+                    ))}
+                    {/* Render missing/other required documents */}
+                    {scheme.missingRequirements && scheme.missingRequirements.map((req, i) => (
+                      <li key={`mis-${i}`} style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '0.9rem' }}>
+                        <span style={{ fontSize: '1.1rem' }}>⚠</span>
+                        <span>{req} ({language === 'hi' ? 'लापता - अपलोड आवश्यक' : 'Missing - Upload Required'})</span>
+                      </li>
+                    ))}
+                    {/* Fallback if list classification isn't returned */}
+                    {(!scheme.uploadedRequirements || scheme.uploadedRequirements.length === 0) && (!scheme.missingRequirements || scheme.missingRequirements.length === 0) && scheme.requirements.map((req, i) => (
+                      <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '0.9rem' }}>
+                        <span>•</span>
+                        <span>{req}</span>
+                      </li>
                     ))}
                   </ul>
                 </details>
@@ -150,20 +197,18 @@ function Results(){
           ))}
         </div>
 
-       
         <div className="results-footer">
           <div className="footer-card">
-            <h3 className="footer-title">Need Help?</h3>
-            
-             <p className="footer-text">
-              
-              Our support team is here to guide you through the application process.
-            
+            <h3 className="footer-title">{language === 'hi' ? 'मदद चाहिए?' : 'Need Help?'}</h3>
+            <p className="footer-text">
+              {language === 'hi' 
+                ? 'हमारी सहायता टीम आवेदन प्रक्रिया में आपका मार्गदर्शन करने के लिए यहाँ है।' 
+                : 'Our support team is here to guide you through the application process.'}
             </p>
             <button className="btn btn-secondary">
-              Contact Support
+              {language === 'hi' ? 'सहायता से संपर्क करें' : 'Contact Support'}
             </button>
-            </div>
+          </div>
         </div>
       </div>
     </div>

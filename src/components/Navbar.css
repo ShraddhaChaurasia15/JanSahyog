@@ -83,16 +83,16 @@
 .navbar-desktop {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.875rem;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--gray-600);
   text-decoration: none;
   border-radius: var(--radius-md);
@@ -611,4 +611,118 @@
     gap: 0.5rem;
     margin-top: 0.5rem;
   }
+}
+
+/* ---- Schemes Dropdown Desktop ---- */
+.nav-dropdown-wrapper {
+  position: relative;
+}
+
+.dropdown-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.dropdown-toggle-btn:hover,
+.dropdown-toggle-btn.active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.dropdown-toggle-btn.active .arrow-icon {
+  transform: rotate(180deg);
+}
+
+.dropdown-toggle-btn svg {
+  color: var(--gray-400);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.dropdown-toggle-btn:hover svg {
+  color: var(--primary);
+}
+
+.schemes-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 220px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg, 12px);
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 1001;
+  animation: slideDownDropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideDownDropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.schemes-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+}
+
+.schemes-dropdown-item:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+.dropdown-item-icon {
+  font-size: 1.1rem;
+}
+
+/* ---- Collapsible Mobile Submenu ---- */
+.mobile-schemes-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.collapsible-header {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.mobile-submenu-link {
+  font-weight: 500;
+  font-size: 0.9rem !important;
+  color: var(--gray-600) !important;
+}
+
+.mobile-submenu-link:hover {
+  color: var(--primary) !important;
 }

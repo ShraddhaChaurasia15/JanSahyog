@@ -29,7 +29,13 @@ function Login({ onLogin }) {
     try{
       const response = await api.login(formData);
       onLogin(response.data.user, response.data.token);
-      navigate('/dashboard');
+      
+      const user = response.data.user;
+      if (!user.profile || !user.profile.age || !user.profile.income) {
+        navigate('/check-eligibility');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {

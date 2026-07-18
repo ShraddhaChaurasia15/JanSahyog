@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const multer = require('multer');
 
+const upload = multer({ storage: multer.memoryStorage() });
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
 // Check eligibility using AI service
 router.post('/check', async (req, res) => {
   try {
-    const { age, income, category, state, gender } = req.body;
+    const { age, income, category, state, gender, uploadedDocuments } = req.body;
 
     // Validate input
     if (!age || !income || !category || !state) {
@@ -17,7 +19,7 @@ router.post('/check', async (req, res) => {
       });
     }
 
-    console.log('Checking eligibility with AI service:', { age, income, category, state, gender });
+    console.log('Checking eligibility with AI service:', { age, income, category, state, gender, uploadedDocuments });
 
     // Call AI service
     const response = await axios.post(`${AI_SERVICE_URL}/api/check-eligibility`, {
@@ -25,7 +27,8 @@ router.post('/check', async (req, res) => {
       income: parseFloat(income),
       category,
       state,
-      gender: gender || null
+      gender: gender || null,
+      uploaded_documents: uploadedDocuments || []
     });
 
     console.log(`Found ${response.data.count} eligible schemes`);
@@ -48,7 +51,7 @@ router.post('/check', async (req, res) => {
 });
 
 // Upload document for OCR
-router.post('/ocr', async (req, res) => {
+router.post('/ocr', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({

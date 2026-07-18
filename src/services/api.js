@@ -33,6 +33,8 @@ const api = {
 
   login: (data) => axiosInstance.post('/auth/login', data),
 
+  updateProfile: (data) => axiosInstance.put('/auth/profile', data),
+
   // Schemes endpoints
   getSchemes: () => axiosInstance.get('/schemes'),
 
@@ -43,9 +45,8 @@ const api = {
   // OCR endpoint (if needed)
 
   uploadDocument: (formData) => {
-    return axiosInstance.post('/ocr', formData, {
+    return axiosInstance.post('/eligibility/ocr', formData, {
       headers: {
-
         'Content-Type': 'multipart/form-data'
       }
     });

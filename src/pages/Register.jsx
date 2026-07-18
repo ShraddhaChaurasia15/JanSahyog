@@ -32,7 +32,7 @@ function Register({ onLogin }) {
     try {
       const response = await api.register(formData);
       onLogin(response.data.user, response.data.token);
-      navigate('/dashboard');
+      navigate('/check-eligibility');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {

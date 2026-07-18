@@ -1,5 +1,7 @@
 node_modules/
 .venv/
+venv/
+ai-service/venv/
 .env
 __pycache__/
 dist/

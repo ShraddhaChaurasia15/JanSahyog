@@ -1,10 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import "./Chatbot.css";
 
 function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
+  const { language } = useLanguage();
+  const messagesEndRef = useRef(null);
+
+  // Auto-scroll to bottom of chat window
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chat, isOpen]);
+
+  // Initial welcome message
+  useEffect(() => {
+    if (chat.length === 0) {
+      setChat([
+        {
+          sender: "bot",
+          text: language === 'hi' 
+            ? "👋 नमस्ते! जनसहयोग एआई सहायक में आपका स्वागत है। मैं आपकी सरकारी योजनाओं, पात्रता और दस्तावेजों के प्रश्नों में मदद कर सकता हूँ। कुछ भी पूछें!"
+            : "👋 Namaste! Welcome to JanSahyog AI Assistant. I can help you with government schemes, eligibility criteria, and required documents. Ask me anything!"
+        }
+      ]);
+    }
+  }, [language]);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -35,7 +57,7 @@ function Chatbot() {
         ...prev,
         {
           sender: "bot",
-          text: data.reply || "Sorry, I couldn't answer right now.",
+          text: data.reply || (language === 'hi' ? "क्षमा करें, मैं अभी उत्तर नहीं दे सका।" : "Sorry, I couldn't answer right now."),
         },
       ]);
     } catch (error) {
@@ -43,7 +65,7 @@ function Chatbot() {
         ...prev,
         {
           sender: "bot",
-          text: "Server not available.",
+          text: language === 'hi' ? "सर्वर उपलब्ध नहीं है।" : "Server not available.",
         },
       ]);
     }
@@ -63,7 +85,7 @@ function Chatbot() {
       {isOpen && (
         <div className="chatbot">
           <div className="chat-header">
-            <span>🤖 JanSahyog AI</span>
+            <span>🤖 {language === 'hi' ? 'जनसहयोग एआई' : 'JanSahyog AI'}</span>
 
             <button
               className="close-btn"
@@ -86,18 +108,24 @@ function Chatbot() {
                 {msg.text}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="chat-input-area">
             <input
               type="text"
-              placeholder="Ask about schemes..."
+              placeholder={language === 'hi' ? 'योजनाओं के बारे में पूछें...' : 'Ask about schemes...'}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  sendMessage();
+                }
+              }}
             />
 
             <button onClick={sendMessage}>
-              Send
+              {language === 'hi' ? 'भेजें' : 'Send'}
             </button>
           </div>
         </div>

@@ -42,6 +42,7 @@ class EligibilityRequest(BaseModel):
     category: str
     state: str
     gender: Optional[str] = None
+    uploaded_documents: Optional[List[str]] = None
 class ChatRequest(BaseModel):
     message: str
 class SchemeMatch(BaseModel):
@@ -58,6 +59,7 @@ SAMPLE_SCHEMES = [
         "category": "Agriculture",
         "benefits": "₹6,000 per year in three installments",
         "duration": "Ongoing",
+        "official_website": "https://pmkisan.gov.in/",
         "criteria": {
             "min_age": 18,
             "max_age": 100,
@@ -77,6 +79,7 @@ SAMPLE_SCHEMES = [
         "category": "Healthcare",
         "benefits": "₹5 Lakh per family per year",
         "duration": "Ongoing",
+        "official_website": "https://pmjay.gov.in/",
         "criteria": {
             "min_age": 0,
             "max_age": 120,
@@ -96,6 +99,7 @@ SAMPLE_SCHEMES = [
         "category": "Housing",
         "benefits": "Subsidy up to ₹2.5 Lakh",
         "duration": "Till 2026",
+        "official_website": "https://pmaymis.gov.in/",
         "criteria": {
             "min_age": 18,
             "max_age": 70,
@@ -115,6 +119,7 @@ SAMPLE_SCHEMES = [
         "category": "Education",
         "benefits": "₹10,000 to ₹50,000 per year",
         "duration": "Academic year",
+        "official_website": "https://scholarships.gov.in/",
         "criteria": {
             "min_age": 5,
             "max_age": 30,
@@ -134,6 +139,7 @@ SAMPLE_SCHEMES = [
         "category": "Finance",
         "benefits": "Loans up to ₹10 Lakh",
         "duration": "Ongoing",
+        "official_website": "https://www.mudra.org.in/",
         "criteria": {
             "min_age": 18,
             "max_age": 65,
@@ -153,6 +159,7 @@ SAMPLE_SCHEMES = [
         "category": "Social Welfare",
         "benefits": "Education support and savings scheme",
         "duration": "Ongoing",
+        "official_website": "https://wcd.nic.in/schemes/beti-bachao-beti-padhao",
         "criteria": {
             "min_age": 0,
             "max_age": 21,
@@ -280,6 +287,26 @@ async def extract_text_from_image(file: UploadFile = File(...)):
             detail=f"OCR processing failed: {str(e)}"
         )
     
+def fetch_official_requirements_via_gemini(scheme_name: str, fallback_requirements: List[str]) -> List[str]:
+    try:
+        # Prompt Gemini to search/verify official requirements for the scheme
+        prompt = f"List exactly the required documents to apply for '{scheme_name}' in India. Return ONLY a valid JSON list of strings (e.g., ['Aadhaar Card', 'Income Certificate', 'Land Records']). Do not write markdown, codeblocks, backticks, or any other explanations."
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        text = response.text.strip()
+        # Clean markdown code block wraps if present
+        if text.startswith("```"):
+            text = re.sub(r"^```(?:json)?\n|```$", "", text, flags=re.MULTILINE).strip()
+        import json
+        docs = json.loads(text)
+        if isinstance(docs, list) and all(isinstance(x, str) for x in docs):
+            return docs
+    except Exception as e:
+        print(f"Failed to fetch requirements from Gemini for {scheme_name}: {e}")
+    return fallback_requirements
+
 @app.post("/api/check-eligibility")
 async def check_eligibility(request: EligibilityRequest):
     """
@@ -356,6 +383,28 @@ async def check_eligibility(request: EligibilityRequest):
 
             reason = generate_eligibility_reason(request, criteria, scheme["category"])
             
+            # Fetch official requirements via Gemini (with local fallback)
+            required_docs = fetch_official_requirements_via_gemini(scheme["name"], scheme.get("requirements", []))
+            
+            # Smart Document Matching Logic
+            uploaded = request.uploaded_documents or []
+            uploaded_normalized = [doc.lower().strip() for doc in uploaded]
+            
+            uploaded_requirements = []
+            missing_requirements = []
+            
+            for req in required_docs:
+                req_lower = req.lower().strip()
+                is_matched = False
+                for u_doc in uploaded_normalized:
+                    if u_doc in req_lower or req_lower in u_doc or ("aadhaar" in req_lower and "aadhaar" in u_doc):
+                        is_matched = True
+                        break
+                
+                if is_matched:
+                    uploaded_requirements.append(req)
+                else:
+                    missing_requirements.append(req)
 
             eligible_schemes.append({
                 "name": scheme["name"],
@@ -367,9 +416,12 @@ async def check_eligibility(request: EligibilityRequest):
                 "probabilityScore": round(probability, 3),
                 "confidenceInterval": confidence_interval,
                 "eligibilityReason": reason,
-                "requirements": scheme.get("requirements", []),
+                "requirements": required_docs,
+                "uploadedRequirements": uploaded_requirements,
+                "missingRequirements": missing_requirements,
                 "statisticalAnalysis": statistical_analysis,
-                "impactScore": impact_score
+                "impactScore": impact_score,
+                "officialWebsite": scheme.get("official_website", "")
             })
 
         ranked_schemes = RecommendationEngine.rank_schemes(
@@ -458,7 +510,6 @@ async def health_check():
 @app.post("/chat")
 async def chat(request: ChatRequest):
     try:
-
         prompt = f"""
         You are JanSahyog AI Assistant.
 
@@ -487,10 +538,70 @@ async def chat(request: ChatRequest):
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+        print(f"Gemini API error inside chat endpoint: {str(e)}. Falling back to rule-based assistant.")
+        # Rule-based fallback
+        msg = request.message.lower()
+        if "kisan" in msg or "farmer" in msg or "agriculture" in msg or "कृषि" in msg or "किसान" in msg:
+            reply = (
+                "🌾 **PM Kisan Samman Nidhi**:\n"
+                "- **Benefits**: ₹6,000 per year in three installments for small and marginal farmers.\n"
+                "- **Eligibility**: Farmers owning cultivable land.\n"
+                "- **Documents Required**: Land ownership documents, Aadhaar card, Bank account details.\n"
+                "- **How to Apply**: Click 'Apply Now' on your dashboard profile page when matched, or visit pmkisan.gov.in."
+            )
+        elif "health" in msg or "ayushman" in msg or "medical" in msg or "hospital" in msg or "स्वास्थ्य" in msg:
+            reply = (
+                "🏥 **Ayushman Bharat (PM-JAY)**:\n"
+                "- **Benefits**: Free health insurance coverage up to ₹5 Lakh per family per year.\n"
+                "- **Eligibility**: Economically vulnerable families listed in SECC database.\n"
+                "- **Documents Required**: Ration card, Income certificate, Aadhaar card.\n"
+                "- **How to Apply**: Visit pmjay.gov.in or any empaneled hospital."
+            )
+        elif "awas" in msg or "housing" in msg or "home" in msg or "house" in msg or "आवास" in msg or "घर" in msg:
+            reply = (
+                "🏠 **Pradhan Mantri Awas Yojana (PMAY)**:\n"
+                "- **Benefits**: Interest subsidy up to ₹2.5 Lakh for building or buying affordable houses.\n"
+                "- **Eligibility**: Families with no pucca house, falling under EWS or LIG income limits.\n"
+                "- **Documents Required**: Aadhaar card, Income certificate, Bank passbook, Land records.\n"
+                "- **How to Apply**: Visit pmaymis.gov.in."
+            )
+        elif "document" in msg or "upload" in msg or "aadhaar" in msg or "pan" in msg or "दस्तावेज" in msg or "आधार" in msg:
+            reply = (
+                "📂 **Document & Scanning Instructions**:\n"
+                "- Go to the **Check Eligibility** page.\n"
+                "- Drag and drop your **Aadhaar Card** or ID into the scanner zone to auto-fill details using our AI OCR reader.\n"
+                "- Verify the auto-filled information (Age, Gender, State, Income, Category) and submit to view eligible schemes.\n"
+                "- Once eligible, you will see a checkmark (✓) for uploaded documents and warning (⚠) for missing ones on the results checklist."
+            )
+        elif "eligibility" in msg or "qualify" in msg or "match" in msg or "पात्रता" in msg:
+            reply = (
+                "✅ **Eligibility Criteria Check**:\n"
+                "- We check age limits, gender priorities, category reservations (OBC, SC, ST, EWS), family annual income brackets, and state of origin restrictions.\n"
+                "- Click **Check Eligibility** in the navigation bar to update your details and match immediately."
+            )
+        elif "hello" in msg or "hi" in msg or "hey" in msg or "नमस्ते" in msg or "हलो" in msg:
+            reply = (
+                "👋 Namaste! Welcome to JanSahyog AI Assistant.\n"
+                "I can help you explore government schemes, eligibility details, and application processes.\n"
+                "Ask me about: \n"
+                "1. 🌾 PM Kisan Samman Nidhi\n"
+                "2. 🏥 Ayushman Bharat Health Insurance\n"
+                "3. 🏠 PM Awas Yojana Housing\n"
+                "4. 🪪 Uploading Documents & scanning Aadhaar"
+            )
+        else:
+            reply = (
+                "🤖 **JanSahyog Helper**:\n"
+                "I am currently in smart backup mode. Tell me what government scheme or service you need help with!\n"
+                "You can ask: \n"
+                "- 'Tell me about PM Kisan Yojana'\n"
+                "- 'How to check Ayushman Bharat eligibility?'\n"
+                "- 'Which documents are required for housing scheme?'"
+            )
+        return {
+            "success": True,
+            "reply": reply
+        }
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
